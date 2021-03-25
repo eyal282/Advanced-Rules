@@ -333,6 +333,7 @@ ShowRulesMenu(client, item=0)
 	}
 	
 	GetConVarString(hcv_AcceptRulesName, TempFormat, sizeof(TempFormat));
+	_RTLify(TempFormat, TempFormat);
 	
 	AddMenuItem(hMenu, "accept", TempFormat);
 	
