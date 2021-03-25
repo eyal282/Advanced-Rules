@@ -2,7 +2,7 @@
 {
 	"Version"
 	{
-		"Latest"	"2.1"
+		"Latest"	"2.3"
 	}
 	
 	"Notes" "Thanks for Niklav for suggesting me to make !showrules not close the menu to show the rules menu for 2 players in a row"
@@ -11,4 +11,5 @@
 "Files"
 {
 	"Plugin"	"Path_SM/plugins/AdvancedRules.smx"
+	"Source"	"Path_SM/scripting/AdvancedRules.sp"
 }
