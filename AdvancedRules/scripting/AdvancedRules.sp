@@ -22,7 +22,7 @@
 
 #define UPDATE_URL    "https://raw.githubusercontent.com/eyal282/Advanced-Rules/master/AdvancedRules/updatefile.txt"
 
-#define PLUGIN_VERSION "2.3"
+#define PLUGIN_VERSION "2.4"
 
 new bool:DisplayRules[MAXPLAYERS+1];
 
@@ -48,6 +48,8 @@ enum struct enRules
 
 new Handle:hcv_ForceShowRules = INVALID_HANDLE;
 new Handle:hcv_AcceptRulesName = INVALID_HANDLE;
+new Handle:hcv_RulesTitle = INVALID_HANDLE;
+
 
 public Plugin:myinfo = 
 {
@@ -138,6 +140,7 @@ public OnPluginStart()
 	CreateConVar("advanced_rules_version", PLUGIN_VERSION, "", FCVAR_NOTIFY);
 	hcv_ForceShowRules = CreateConVar("advanced_rules_force_show", "-1", "If a player didn't accept the rules or if they were updated, show rules menu in x seconds after connect, -1 to disable.");
 	hcv_AcceptRulesName = CreateConVar("advanced_rules_accept_name", "ACCEPT THE RULES");
+	hcv_RulesTitle = CreateConVar("advanced_rules_title", "Choose a rule for info:/n Rules with ⬤ are newer than the last time you accepted them/n At the end of the menu you can accept the rules or accept possible punishments.", "Title of the rules menu. Use /n for new line");
 	
 	hCookie_LastAccept = RegClientCookie("AdvancedRules_LastAcceptRules", "The last time you have accepted the rules, unix timestamp.", CookieAccess_Public);
 	
@@ -149,7 +152,6 @@ public OnPluginStart()
 	AutoExecConfig_CleanFile();
 	
 	#endif
-	
 	
 	#if defined _updater_included
 	if (LibraryExists("updater"))
@@ -319,7 +321,7 @@ ShowRulesMenu(client, item=0)
 	enRules RuleArray;
 	
 	new ArraySize = GetArraySize(Array_Rules);
-	new String:TempFormat[65];
+	new String:TempFormat[256];
 	
 	new LastAcceptRules = GetClientLastAcceptRules(client);
 	
@@ -328,7 +330,7 @@ ShowRulesMenu(client, item=0)
 		GetArrayArray(Array_Rules, i, RuleArray, sizeof(enRules));
 		
 		_RTLify(RuleArray.enRuleName, RuleArray.enRuleName);
-		Format(TempFormat, sizeof(TempFormat), "%s%s", RuleArray.enRuleName, LastAcceptRules < RuleArray.enRuleLastEdit ? "*" : "");
+		Format(TempFormat, sizeof(TempFormat), "%s%s", LastAcceptRules < RuleArray.enRuleLastEdit ? "⬤ " : "", RuleArray.enRuleName);
 		AddMenuItem(hMenu, "", TempFormat);
 	}
 	
@@ -337,7 +339,22 @@ ShowRulesMenu(client, item=0)
 	
 	AddMenuItem(hMenu, "accept", TempFormat);
 	
-	SetMenuTitle(hMenu, "Choose a rule for info:\n Rules with * are newer than the last time you accepted them\n At the end of the menu you can accept the rules or accept possible punishments.");
+	GetConVarString(hcv_RulesTitle, TempFormat, sizeof(TempFormat));
+	
+	new String:ExplodedString[6][100];
+	
+	new lines = ExplodeString(TempFormat, "/n", ExplodedString, sizeof(ExplodedString), sizeof(ExplodedString[]));
+	
+	TempFormat[0] = EOS;
+	
+	for(new i=0;i < lines;i++)
+	{
+		_RTLify(ExplodedString[i], ExplodedString[i]);
+		Format(TempFormat, sizeof(TempFormat), "%s%s\n ", TempFormat, ExplodedString[i]);
+	}
+	
+	TempFormat[strlen(TempFormat) - 2] = EOS;
+	SetMenuTitle(hMenu, TempFormat);
 	
 	DisplayMenuAtItem(hMenu, client, item, MENU_TIME_FOREVER);
 }
@@ -393,7 +410,7 @@ ShowClientRule(client, item)
 	new String:PanelTitle[66];
 	
 	_RTLify(RuleArray.enRuleName, RuleArray.enRuleName);
-	Format(PanelTitle, sizeof(PanelTitle), "%s%s\n", RuleArray.enRuleName, GetClientLastAcceptRules(client) < RuleArray.enRuleLastEdit ? "*" : "");
+	Format(PanelTitle, sizeof(PanelTitle), "%s%s\n ", GetClientLastAcceptRules(client) < RuleArray.enRuleLastEdit ? "⬤ " : "", RuleArray.enRuleName);
 	SetPanelTitle(hPanel, PanelTitle, false);
 	
 	SendPanelToClient(hPanel, client, PanelHandler_ShowRule, MENU_TIME_FOREVER);
