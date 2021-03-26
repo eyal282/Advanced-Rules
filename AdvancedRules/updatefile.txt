@@ -2,10 +2,10 @@
 {
 	"Version"
 	{
-		"Latest"	"2.3"
+		"Latest"	"2.4"
 	}
 	
-	"Notes" "Thanks for Niklav for suggesting me to make !showrules not close the menu to show the rules menu for 2 players in a row"
+	"Notes" "New cvar to add edit the rules menu title"
 }
 	
 "Files"
